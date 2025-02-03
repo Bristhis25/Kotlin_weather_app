@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.widget.Space
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +22,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -51,6 +55,29 @@ fun Register(navController: NavController){
     var passwordconfirmed by remember {
         mutableStateOf("")
     }
+
+    val authViewModel = AuthViewModel()
+    val authState = authViewModel.authState.observeAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(authState.value) {
+        when (authState.value) {
+            is AuthViewModel.AuthState.Authenticated -> {
+                navController.navigate(Routes.Home)
+            }
+            is AuthViewModel.AuthState.Error -> {
+                Toast.makeText(context,
+                    (authState.value as AuthViewModel.AuthState.Error).message,
+                    Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                Unit
+            }
+        }
+
+    }
+
+
     Box(
         modifier = Modifier.background(color = Color.DarkGray)
     ){
@@ -96,7 +123,15 @@ fun Register(navController: NavController){
 
             Button(
                 colors = ButtonColors(containerColor = Color.Gray, contentColor = Color.White, disabledContentColor = Color.Gray, disabledContainerColor = Color.Gray),
-                onClick = {}) {
+                onClick = {
+                    //Action pour l'inscription' avec mot de passe et email
+                    authViewModel.register(email, password)
+                }
+                ,
+                enabled = authState.value != AuthViewModel.AuthState.Loading
+            )
+
+            {
                 Text("S'inscrire")
             }
 

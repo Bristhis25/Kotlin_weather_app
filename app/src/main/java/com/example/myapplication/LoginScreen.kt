@@ -1,6 +1,8 @@
 package com.example.myapplication
 
 import android.widget.Space
+import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,6 +27,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
@@ -32,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -52,6 +56,22 @@ fun LoginScreen(navController: NavController){
     var password by remember {
         mutableStateOf("")
     }
+
+    val authViewModel = AuthViewModel()
+    val authState = authViewModel.authState.observeAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(authState.value){
+        when(authState.value){
+            is AuthViewModel.AuthState.Authenticated ->
+                navController.navigate(Routes.Home)
+            is AuthViewModel.AuthState.Error -> Toast.makeText(context,
+                (authState.value as AuthViewModel.AuthState.Error).message, Toast.LENGTH_SHORT).show()
+            else -> Unit
+        }
+    }
+
+
 
     Box(
         modifier = Modifier.background(color = Color.DarkGray)) {
@@ -98,7 +118,14 @@ fun LoginScreen(navController: NavController){
             // Button Connecté
             Button(
                 colors = ButtonColors(containerColor = Color.Gray, contentColor = Color.White, disabledContentColor = Color.Gray, disabledContainerColor = Color.Gray),
-                onClick = {}) {
+                onClick = {
+                    //Action pour la connexion avec mot de passe et email
+                    authViewModel.login(email, password)
+
+                },
+                        enabled = authState.value != AuthViewModel.AuthState.Loading
+            )
+            {
                 Text("Se Connecter")
             }
 
@@ -118,6 +145,7 @@ fun LoginScreen(navController: NavController){
                 Text("S’authentifier avec Google", style = TextStyle(color = Color.White), modifier = Modifier.clickable
                 {
                 //Action pour la connexion via google
+
 
                 })
 

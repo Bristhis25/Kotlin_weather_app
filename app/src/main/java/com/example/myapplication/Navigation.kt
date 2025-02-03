@@ -23,6 +23,11 @@ fun MyAppNavigation(){
         ) {
             ForgottenPassword(navController)
         }
+        composable(
+            Routes.Home
+        ) {
+            Home(navController)
+        }
     })
 
 }
