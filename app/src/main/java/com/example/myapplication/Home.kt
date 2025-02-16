@@ -33,6 +33,7 @@ fun Home(navController: NavController) {
         navController.navigate(Routes.Login)
         return
     }
+
     else if (authState.value == AuthViewModel.AuthState.Authenticated) {
         // Affichage de la page d'accueil de l'application
 

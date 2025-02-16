@@ -11,7 +11,13 @@ fun MyAppNavigation(){
     NavHost(navController, startDestination = Routes.Login, builder = {
         composable(
             Routes.Login){
-            LoginScreen(navController)
+            LoginScreen(
+                navController,
+                state = SignInState(),
+                onSignInClick = {
+                    navController.navigate(Routes.Home)
+                }
+            )
         }
 
         composable(
